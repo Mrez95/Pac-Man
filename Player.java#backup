@@ -1,0 +1,373 @@
+import greenfoot.*;  // (World, Actor, GreenfootImage, Greenfoot and MouseInfo)
+import java.util.List;
+import java.awt.Color;
+
+public class Player extends Actor
+{
+    private boolean left = true;
+    private boolean right;
+    private boolean down;
+    private boolean up;
+    private boolean pdown;
+    private int foodEaten = 0;
+    private int setImage=1;
+    private int imageCounter=0;
+    private int totalScore;
+    private int ghostScores=0;
+    private int p2Life=0;
+    public int deadImage=1;
+    public int life=3;
+    public boolean win;
+    public boolean playerIsDead;
+    public boolean paused;
+    
+
+    public Player()
+    {
+        setImage(new GreenfootImage("pacman2.png"));
+    }
+    public void act()
+    {
+        World world = getWorld();
+        if(world instanceof Pacman) {
+            motionSet();
+        }
+        else {
+            if(world instanceof MultiPlayer && !getWorld().getObjects(Ready.class).isEmpty()) {
+                setImage(new GreenfootImage("pacman2.png"));
+                setLocation(350, 440); setRotation(0); deadImage=1; setImage=1; left=true; right=false; down=false; up=false;
+            }
+            else if(!getWorld().getObjects(Ready.class).isEmpty()) {
+                setImage(new GreenfootImage("pacman2.png"));
+                setLocation(365, 440); setRotation(0); deadImage=1; setImage=1; left=true; right=false; down=false; up=false;
+            }
+            if(getWorld().getObjects(Ready.class).isEmpty()) {
+                if(!paused)
+                {
+                    Ghost isDead = isPlayerDead(); Player2 dead = otherDead();
+                    if(dead==null) {
+                        if(isDead==null && !playerIsDead) {
+                            moveSet(); eatFood(); port(); addScores();
+                            totalScore=foodEaten+ghostScores;
+                            if(world instanceof MultiPlayer) player2Life();
+                            if(getWorld().getObjects(Food.class).isEmpty() && !win) {
+                                win=true; getWorld().addObject(new Win(), 365, 350); getWorld().addObject(new BMenu(), 350, 550);
+                                if(world instanceof SinglePlayer && getWorld().getObjects(Banner.class).isEmpty()) {
+                                    Actor win = new Banner();
+                                    getWorld().addObject(win, 365, 420);
+                                    win.setImage(new GreenfootImage("" + totalScore, 72, java.awt.Color.WHITE, java.awt.Color.BLACK));
+                                }
+                                else if(world instanceof MultiPlayer && getWorld().getObjects(Banner.class).isEmpty()) {
+                                    Actor win = new Banner();
+                                    getWorld().addObject(win, 220, 420);
+                                    win.setImage(new GreenfootImage("" + totalScore, 72, java.awt.Color.WHITE, java.awt.Color.BLACK));
+                                }
+                                List ghosts = getWorld().getObjects(Ghost.class); getWorld().removeObjects(ghosts);
+                            }
+                        }
+                        else if(!getObjectsInRange(25,Ghost.class).isEmpty()) {
+                            playerIsDead=true;
+                        }
+                        switchImage();
+                    }
+                    else {
+                        setImage(new GreenfootImage("pacman6.png"));
+                        if(!getWorld().getObjects(Lose.class).isEmpty() && getWorld().getObjects(Banner.class).isEmpty()) {
+                            Actor lose = new Banner();
+                            getWorld().addObject(lose, 220, 420);
+                            lose.setImage(new GreenfootImage("" + totalScore, 72, java.awt.Color.WHITE, java.awt.Color.BLACK));
+                            }
+                    }
+                }
+                if (!playerIsDead) isPaused();
+            }
+        }
+    }
+    public void motionSet()
+    {
+        int x=getX(); int y=getY();
+        if(y==345) {
+            left=true; right=false;
+        }
+        if(y==475) {
+            left=false; right=true;
+        }
+        if(x==0 && y==345) setLocation(464,475);
+        if(x==730 && y==475) setLocation(0,475);
+        if(x==330 && y==475) setLocation(375, 345);
+        motionMove(); motionImage();
+    }
+    public void motionMove()
+    {
+        if(left) {
+            setLocation(getX()-2,getY()); setRotation(0);
+        }
+        else if(right) {
+            setLocation(getX()+2,getY()); setRotation(180);
+        }
+    }
+    public void motionImage()
+    {
+        if(imageCounter==10) {
+            if(setImage==1) {
+                setImage(new GreenfootImage("pacman2.png")); setImage=2;
+            }
+            else if(setImage==2) {
+                setImage(new GreenfootImage("pacman3.png")); setImage=1;
+            }
+            imageCounter=0;
+        }
+        else imageCounter=imageCounter+1;
+    }
+    public void eatFood()
+    {
+        Actor Food1 = getOneObjectAtOffset(0,0, Food1.class); Actor Food2 = getOneObjectAtOffset(0,0, Food2.class);
+        if(Food1 != null) {
+            getWorld().removeObject(Food1); foodEaten = foodEaten + 5;
+        }
+        if(Food2 != null) {
+            getWorld().removeObject(Food2); foodEaten = foodEaten + 2;
+        }
+    }
+    public void moveSet()
+    {
+        if(Greenfoot.isKeyDown("left") && canMove(getX()-23, getY()) && canMove(getX()-23, getY()-22) && canMove(getX()-23, getY()+22) && canMove(getX()-23, getY()-6) && canMove(getX()-23, getY()+6) && canMove(getX()-23, getY()-12) && canMove(getX()-23, getY()+12)) {
+            left = true; right = false; up = false; down = false;
+        }
+        else if(Greenfoot.isKeyDown("right") && canMove(getX()+23, getY()) && canMove(getX()+23, getY()-22) && canMove(getX()+23, getY()+22) && canMove(getX()+23, getY()-6) && canMove(getX()+23, getY()+6) && canMove(getX()+23, getY()-12) && canMove(getX()+23, getY()+12)) {
+            left = false; right = true; up = false; down = false;
+        }
+        else if(Greenfoot.isKeyDown("up") && canMove(getX(), getY()-23) && canMove(getX()-22, getY()-23) && canMove(getX()+22, getY()-23) && canMove(getX()-6, getY()-23) && canMove(getX()+6, getY()-23) && canMove(getX()-12, getY()-23) && canMove(getX()+12, getY()-23)) {
+            left = false; right = false; up = true; down = false;
+        }
+        else if(Greenfoot.isKeyDown("down") && canMove(getX(), getY()+23) && canMove(getX()-22, getY()+23) && canMove(getX()+22, getY()+23) && canMove(getX()-6, getY()+23) && canMove(getX()+6, getY()+23) && canMove(getX()-12, getY()+23) && canMove(getX()+12, getY()+23)) {
+            left = false; right = false; up = false; down = true;
+        }
+        move();
+    }
+    public void move()
+    {
+        if(left && canMove(getX()-23, getY()) && canMove(getX()-23, getY()-12) && canMove(getX()-23, getY()+12)) {
+            setLocation(getX()-1,getY()); setRotation(0);
+        }
+        else if(right && canMove(getX()+23, getY()) && canMove(getX()+23, getY()-12) && canMove(getX()+23, getY()+12)) {
+            setLocation(getX()+1,getY()); setRotation(180);
+        }
+        else if(up && canMove(getX(), getY()-23) && canMove(getX()-12, getY()-23) && canMove(getX()+12, getY()-23)) {
+            setLocation(getX(),getY()-1); setRotation(90);
+        }
+        else if(down && canMove(getX(), getY()+23) && canMove(getX()-12, getY()+23) && canMove(getX()+12, getY()+23))
+        {
+            setLocation(getX(),getY()+1); setRotation(270);
+        }
+    }
+    public void switchImage()
+    {
+        if(imageCounter==15) {
+            if(!playerIsDead) {
+                if(setImage==1) {
+                    setImage(new GreenfootImage("pacman2.png")); setImage=2;
+                }
+                else if(setImage==2) {
+                    setImage(new GreenfootImage("pacman3.png")); setImage=3;
+                }
+                else if(setImage==3) {
+                    setImage(new GreenfootImage("pacman2.png")); setImage=4;
+                }
+                else if(setImage==4) {
+                    setImage(new GreenfootImage("pacman1.png")); setImage=1;
+                }
+            }
+            else {
+                if(deadImage==1) setImage(new GreenfootImage("pacman3.png"));
+                setRotation(90);
+                if(deadImage==5) {
+                    setImage(new GreenfootImage("pacman4.png")); deadImage=6;
+                }
+                else if(deadImage==7) {
+                    setImage(new GreenfootImage("pacman1.png")); deadImage=8;
+                }
+                else if(deadImage==9) {
+                    setImage(new GreenfootImage("pacman5.png")); deadImage=10;
+                }
+                else if(deadImage==11) {
+                    setImage(new GreenfootImage("pacman6.png")); deadImage=12;
+                }
+                else if(deadImage==13) {
+                    setImage(new GreenfootImage("pacman dead.png")); deadImage=14;
+                }
+                else if(deadImage==15) {
+                    setImage(new GreenfootImage("pacman6.png")); deadImage=16;
+                }
+                else if(deadImage==20) {
+                    if(life==3) {
+                        List l=getWorld().getObjects(Life.class);
+                        getWorld().removeObjects(l); getWorld().addObject(new Life(), 25, 475); getWorld().addObject(new Life(), 25, 525); life=2;
+                        getWorld().addObject(new Ready(), 365, 530); setLocation(365, 440);
+                        left=true; right=false; up=false; down=false; playerIsDead=false; imageCounter=0; deadImage=1;
+                        setImage(new GreenfootImage("pacman2.png")); setRotation(0);
+                        if(p2Life==3) {
+                            getWorld().addObject(new Life(), 715, 475); getWorld().addObject(new Life(), 715, 525); getWorld().addObject(new Life(), 715, 575);
+                        }
+                        else if(p2Life==2) {
+                            getWorld().addObject(new Life(), 715, 475); getWorld().addObject(new Life(), 715, 525);
+                        }
+                        else if(p2Life==1) {
+                            getWorld().addObject(new Life(), 715, 475);
+                        }
+                    }
+                    else if(life==2) {
+                        List l=getWorld().getObjects(Life.class);
+                        getWorld().removeObjects(l); getWorld().addObject(new Life(), 25, 475); life=1;
+                        getWorld().addObject(new Ready(), 365, 530); setLocation(365, 440);
+                        left=true; right=false; up=false; down=false; playerIsDead=false; imageCounter=0; deadImage=1;
+                        setImage(new GreenfootImage("pacman2.png")); setRotation(0);
+                        if(p2Life==3) {
+                            getWorld().addObject(new Life(), 715, 475); getWorld().addObject(new Life(), 715, 525); getWorld().addObject(new Life(), 715, 575);
+                        }
+                        else if(p2Life==2) {
+                            getWorld().addObject(new Life(), 715, 475); getWorld().addObject(new Life(), 715, 525);
+                        }
+                        else if(p2Life==1) {
+                            getWorld().addObject(new Life(), 715, 475);
+                        }
+                    }
+                    else if(life==1) {
+                        List l=getWorld().getObjects(Life.class);
+                        getWorld().removeObjects(l); life=0;
+                        getWorld().addObject(new Ready(), 365, 530); setLocation(365, 440);
+                        left=true; right=false; up=false; down=false; playerIsDead=false; imageCounter=0; deadImage=1;
+                        setImage(new GreenfootImage("pacman2.png")); setRotation(0);
+                        if(p2Life==3) {
+                            getWorld().addObject(new Life(), 715, 475); getWorld().addObject(new Life(), 715, 525); getWorld().addObject(new Life(), 715, 575);
+                        }
+                        else if(p2Life==2) {
+                            getWorld().addObject(new Life(), 715, 475); getWorld().addObject(new Life(), 715, 525);
+                        }
+                        else if(p2Life==1) {
+                            getWorld().addObject(new Life(), 715, 475);
+                        }
+                    }
+                    else {
+                        getWorld().addObject(new Lose(), 365, 350); getWorld().addObject(new BMenu(), 180, 550); getWorld().addObject(new Retry(), 500, 555); deadImage=21;
+                        World world = getWorld();
+                        if(world instanceof SinglePlayer && getWorld().getObjects(Banner.class).isEmpty()) {
+                            Actor lose = new Banner();
+                            getWorld().addObject(lose, 365, 420);
+                            lose.setImage(new GreenfootImage("" + totalScore, 72, java.awt.Color.WHITE, java.awt.Color.BLACK));
+                        }
+                        else if(world instanceof MultiPlayer && getWorld().getObjects(Banner.class).isEmpty()) {
+                            Actor lose = new Banner();
+                            getWorld().addObject(lose, 220, 420);
+                            lose.setImage(new GreenfootImage("" + totalScore, 72, java.awt.Color.WHITE, java.awt.Color.BLACK));
+                        }
+                    }
+                }
+                else if (deadImage!=21) deadImage=deadImage+1;
+            }
+            imageCounter=0;
+        }
+        else imageCounter=imageCounter+1;
+    }
+    public void port()
+    {
+        int x=getX(); int y=getY();
+        if(x==680 && y==350) {
+            setLocation(51,350); left=false; right=true;
+        }
+        if(x==50 && y==350) {
+            setLocation(679,350); left=true; right=false;
+        }
+    }
+    public void isPaused()
+    {
+        if(Greenfoot.isKeyDown("p") && !paused && !pdown) {
+            getWorld().addObject(new Pause(), 365, 350); getWorld().addObject(new Resume(), 330, 400);
+            paused=true;
+        }
+        else if(Greenfoot.isKeyDown("p") && paused && !pdown) {
+            List p = getWorld().getObjects(Pause.class); List r = getWorld().getObjects(Resume.class);
+            getWorld().removeObjects(p); getWorld().removeObjects(r);
+            paused=false;
+        }
+        if(Greenfoot.isKeyDown("p")) pdown=true;
+        else pdown=false;
+        if(getWorld().getObjects(Pause.class).isEmpty()) paused=false;
+    }
+    private void player2Life()
+    {
+        int pl = 0;
+        for (Object obj : getWorld().getObjects(Player2.class)) {
+            Player2 a = (Player2) obj;
+            pl += a.p2Life;
+        }
+        p2Life=pl;
+    }
+    private void addScores()
+    {
+        int gSum = 0;
+        for (Object obj : getWorld().getObjects(Ghost1.class)) {
+            Ghost1 a = (Ghost1) obj;
+            gSum += a.playerScore;
+        }
+        for (Object obj : getWorld().getObjects(Ghost2.class)) {
+            Ghost2 b = (Ghost2) obj;
+            gSum += b.playerScore;
+        }
+        for (Object obj : getWorld().getObjects(Ghost3.class)) {
+            Ghost3 c = (Ghost3) obj;
+            gSum += c.playerScore;
+        }
+        for (Object obj : getWorld().getObjects(Ghost4.class)) {
+            Ghost4 d = (Ghost4) obj;
+            gSum += d.playerScore;
+        }
+        for (Object obj : getWorld().getObjects(Ghost5.class)) {
+            Ghost5 e = (Ghost5) obj;
+            gSum += e.playerScore;
+        }
+        ghostScores = gSum;
+    }
+    public boolean canMove(int x, int y)
+    {
+        List block = getWorld().getObjectsAt(x, y, Wall.class); List gate = getWorld().getObjectsAt(x, y, Gate.class);
+        if(block.isEmpty() && gate.isEmpty()) return true;
+        return false;
+    }
+    public boolean PlayerDead()
+    {
+        return !getObjectsInRange(25,Ghost.class).isEmpty();
+    }
+    private Ghost isPlayerDead()
+    {
+        for (Object obj : getWorld().getObjects(Ghost1.class)) {
+            Ghost1 a = (Ghost1) obj;
+            if (a.playerDie) return a;
+        }
+        for (Object obj : getWorld().getObjects(Ghost2.class)) {
+            Ghost2 b = (Ghost2) obj;
+            if (b.playerDie) return b;
+        }
+        for (Object obj : getWorld().getObjects(Ghost3.class)) {
+            Ghost3 c = (Ghost3) obj;
+            if (c.playerDie) return c;
+        }
+        for (Object obj : getWorld().getObjects(Ghost4.class)) {
+            Ghost4 d = (Ghost4) obj;
+            if (d.playerDie) return d;
+        }
+        for (Object obj : getWorld().getObjects(Ghost5.class)) {
+            Ghost5 e = (Ghost5) obj;
+            if (e.playerDie) return e;
+        }
+        return null;
+    }
+    private Player2 otherDead()
+    {
+        for (Object obj : getWorld().getObjects(Player2.class)) {
+            Player2 i = (Player2) obj;
+            if (i.playerIsDead) return i;
+        }
+        return null;
+    }
+}

@@ -1,0 +1,8 @@
+#BlueJ class context
+comment0.params=
+comment0.target=Menu()
+comment1.params=ID
+comment1.target=Menu(int)
+comment2.params=title\ prefix
+comment2.target=void\ makeImage(java.lang.String,\ java.lang.String)
+numComments=3

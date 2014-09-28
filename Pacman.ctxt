@@ -1,0 +1,14 @@
+#BlueJ class context
+comment0.params=
+comment0.target=Pacman()
+comment1.params=
+comment1.target=void\ act()
+comment2.params=
+comment2.target=void\ menu()
+comment3.params=
+comment3.target=void\ singleplayer()
+comment4.params=
+comment4.target=void\ multiplayer()
+comment5.params=map\ x\ y
+comment5.target=void\ mapReader(int,\ int,\ int)
+numComments=6

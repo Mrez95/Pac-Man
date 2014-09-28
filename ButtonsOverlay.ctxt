@@ -1,0 +1,16 @@
+#BlueJ class context
+comment0.params=state
+comment0.target=ButtonsOverlay(int)
+comment1.params=
+comment1.target=void\ act()
+comment2.params=
+comment2.target=void\ checkImage()
+comment3.params=
+comment3.target=void\ checkMouse()
+comment4.params=
+comment4.target=void\ checkClicked()
+comment5.params=type
+comment5.target=void\ makeKeyImage(java.lang.String)
+comment6.params=text
+comment6.target=void\ makeImage(java.lang.String)
+numComments=7

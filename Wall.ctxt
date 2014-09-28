@@ -1,0 +1,8 @@
+#BlueJ class context
+comment0.params=
+comment0.target=Wall()
+comment1.params=angle\ imageString
+comment1.target=void\ setImageRotation(int,\ java.lang.String)
+comment2.params=map
+comment2.target=Wall(int)
+numComments=3
