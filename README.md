@@ -19,7 +19,7 @@ To preview simply download the ZIP through git and import the entire project to 
 
 License
 -------------
-Copyright (c) 2014 Eddie Zhang.
+Copyright (c) 2015 Eddie Zhang.
 
 _________________________
 **Stay tuned for a web application version of this project soon. Currently under developement**
